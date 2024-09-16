@@ -9,7 +9,6 @@ RUN export DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y --allow-unauthenticated && \
     apt-get update && apt-get install -y --allow-unauthenticated build-essential software-properties-common apt-utils && \
     apt-get update && \
-    add-apt-repository ppa:rncbc/qt6.6-static-jammy && \
     add-apt-repository --yes ppa:ubuntu-x-swat/updates && \
     apt-get update
 

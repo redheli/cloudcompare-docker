@@ -66,8 +66,14 @@ RUN apt-get update && apt-get install -y --allow-unauthenticated \
 RUN ln -s /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so /usr/lib/libvtkproj4.so
 
 # Install OpenGL Drivers
-RUN apt-get update && \
-    apt-get install -y --allow-unauthenticated libglu1-mesa-dev freeglut3-dev mesa-common-dev mesa-utils
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+    curl -fsSL https://xpra.org/gpg.asc | gpg --dearmor -o /usr/share/keyrings/xpra-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/xpra-archive-keyring.gpg] https://xpra.org/ focal main" | tee /etc/apt/sources.list.d/xpra.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y --allow-unauthenticated libglu1-mesa-dev freeglut3-dev mesa-common-dev mesa-utils && \
+    apt-get install -y gnupg
 
 # GDAL
 RUN add-apt-repository --yes ppa:ubuntugis/ppa && \
@@ -218,9 +224,13 @@ COPY metashape.desktop /usr/share/applications/
 RUN cd /opt && rm -rf *.tar.bz2 && \
     rm -rf *.tar.gz && rm -rf *.deb
 
-USER user
+# Create the user 'max'
+RUN useradd -m -s /bin/bash max
 
-RUN mkdir /home/user/.irods && echo '{"irods_host": "data.cyverse.org", "irods_port": 1247, "irods_user_name": "$IPLANT_USER", "irods_zone_name": "iplant"}' | tee  > /home/user/.irods/irods_environment.json
+# Switch to the user 'max'
+USER max
+
+RUN mkdir /home/max/.irods && echo '{"irods_host": "data.cyverse.org", "irods_port": 1247, "irods_user_name": "$IPLANT_USER", "irods_zone_name": "iplant"}' | tee  > /home/max/.irods/irods_environment.json
 
 VOLUME /tmp/.X11-unix
 
